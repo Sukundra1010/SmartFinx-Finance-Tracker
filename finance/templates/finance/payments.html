@@ -1,0 +1,247 @@
+{% extends "finance/base.html" %}
+{% load static %}
+
+{% block title %}Payments{% endblock %}
+{% block breadcrumb %}Payments{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">SECURE SUBSCRIPTIONS</p>
+      <div class="payment-title">
+        <img
+          class="subscription-mark"
+          src="{% static 'images/subscription-check.svg' %}"
+          alt=""
+          aria-hidden="true"
+        >
+        <h1>Payments</h1>
+      </div>
+      <p class="muted">Manage your SmartFinX plan and view verified payment history.</p>
+    </div>
+    <a class="button button-secondary" href="{% url 'payment_report' %}">Download report</a>
+  </div>
+
+  {% if subscription %}
+    <section class="panel payment-subscription">
+      <div>
+        <p class="eyebrow">YOUR SUBSCRIPTION</p>
+        <h2>{{ subscription.plan.name }}</h2>
+        <p class="muted">
+          {% if subscription.is_active %}
+            Active until {{ subscription.expires_at|date:"M j, Y, P" }}
+          {% else %}
+            Expired {{ subscription.expires_at|date:"M j, Y, P" }}
+          {% endif %}
+        </p>
+      </div>
+      <span
+        class="payment-status
+          {% if subscription.is_active %}
+            payment-status-success
+          {% else %}
+            payment-status-failed
+          {% endif %}"
+      >
+        {% if subscription.is_active %}Active{% else %}Expired{% endif %}
+      </span>
+    </section>
+  {% endif %}
+
+  <section class="panel payment-plans">
+    <div class="panel-heading">
+      <div>
+        <h2>Choose a plan</h2>
+        <p class="muted">
+          Plan prices and durations are managed by SmartFinX administrators.
+        </p>
+      </div>
+      {% if payments_mode == "sandbox" %}
+        <span class="badge badge-green">Sandbox only</span>
+      {% else %}
+        <span class="badge badge-red">Payments disabled</span>
+      {% endif %}
+    </div>
+    {% if payments_mode != "sandbox" %}
+      <p class="payment-notice">
+        Payments are turned off. No charges can be made until sandbox access is configured.
+        Live payments are not enabled.
+      </p>
+    {% endif %}
+    {% if payments_mode == "sandbox" and not gateway_configured %}
+      <p class="payment-notice">
+        Sandbox mode is on, but no provider credentials are configured.
+        Checkout is unavailable.
+      </p>
+    {% endif %}
+    {% if form.plan.field.queryset %}
+      <form method="post" action="{% url 'payment_initiate' %}" class="payment-form">
+        {% csrf_token %}
+        <div class="field">
+          <label for="{{ form.plan.id_for_label }}">Subscription plan</label>
+          {{ form.plan }}
+        </div>
+        <div class="field">
+          <label for="{{ form.provider.id_for_label }}">Sandbox payment provider</label>
+          <select name="provider" id="{{ form.provider.id_for_label }}" required>
+            {% for value, label, configured in gateway_options %}
+              <option value="{{ value }}" {% if not configured %}disabled{% endif %}>
+                {{ label }}{% if not configured %} (not configured){% endif %}
+              </option>
+            {% endfor %}
+          </select>
+          <small class="help">
+            Choose eSewa or Khalti sandbox. The server verifies payment status.
+          </small>
+        </div>
+        <button
+          class="button button-primary"
+          type="submit"
+          {% if payments_mode != "sandbox" or not gateway_configured %}
+            disabled
+          {% endif %}
+        >
+          Continue to secure checkout
+        </button>
+      </form>
+      <div class="plan-list">
+        {% for plan in form.plan.field.queryset %}
+          <article class="plan-card">
+            <h3>{{ plan.name }}</h3>
+            <p class="muted">
+              {{ plan.description|default:"SmartFinX subscription" }}
+            </p>
+            <strong>Rs. {{ plan.price|floatformat:2 }}</strong>
+            <small>{{ plan.duration_days }} days</small>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state compact">
+        <span class="empty-icon">◈</span>
+        <h3>No plans available</h3>
+        <p>
+          An administrator needs to add and activate a subscription plan before
+          checkout is available.
+        </p>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="panel payment-history">
+    <div class="panel-heading">
+      <div>
+        <h2>Payment history</h2>
+        <p class="muted">Only provider-verified payments are marked successful.</p>
+      </div>
+      <form method="get" class="payment-filters">
+        <label class="sr-only" for="payment-status-filter">Filter by status</label>
+        <select id="payment-status-filter" name="status">
+          <option value="">All statuses</option>
+          {% for value, label in status_choices %}
+            <option
+              value="{{ value }}"
+              {% if selected_status == value %}selected{% endif %}
+            >
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+        <label class="sr-only" for="payment-provider-filter">Filter by provider</label>
+        <select id="payment-provider-filter" name="provider">
+          <option value="">All providers</option>
+          {% for value, label in provider_choices %}
+            <option
+              value="{{ value }}"
+              {% if selected_provider == value %}selected{% endif %}
+            >
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+        <button class="button button-secondary" type="submit">Filter</button>
+      </form>
+    </div>
+    {% if payments %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Amount</th>
+              <th>Provider</th>
+              <th>Status</th>
+              <th>Payment date</th>
+              <th>Transaction ID</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for payment in payments %}
+              <tr>
+                <td>
+                  <strong>
+                    {{ payment.plan_name|default:payment.plan.name }}
+                  </strong>
+                </td>
+                <td>Rs. {{ payment.amount|floatformat:2 }}</td>
+                <td>{{ payment.get_provider_display }}</td>
+                <td>
+                  <span class="payment-status payment-status-{{ payment.status }}">
+                    {{ payment.get_status_display }}
+                  </span>
+                </td>
+                <td>
+                  {{ payment.paid_at|default:payment.created_at|date:"M j, Y, P" }}
+                </td>
+                <td>{{ payment.transaction_id|default:"—" }}</td>
+                <td>
+                  <a
+                    class="text-link"
+                    href="{% url 'payment_receipt' payment.order_id %}"
+                  >
+                    Receipt
+                  </a>
+                </td>
+              </tr>
+              {% if payment.status_message %}
+                <tr class="payment-detail-row">
+                  <td colspan="7">{{ payment.status_message }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if page_obj.has_other_pages %}
+        <div class="payment-pagination">
+          {% if page_obj.has_previous %}
+            <a
+              class="button button-secondary"
+              href="{{ previous_page_url }}"
+            >
+              Previous
+            </a>
+          {% endif %}
+          <span>
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+          </span>
+          {% if page_obj.has_next %}
+            <a
+              class="button button-secondary"
+              href="{{ next_page_url }}"
+            >
+              Next
+            </a>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state compact">
+        <span class="empty-icon">◈</span>
+        <h3>No payments found</h3>
+        <p>Your payment attempts and receipts will appear here.</p>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

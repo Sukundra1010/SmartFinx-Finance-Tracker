@@ -1,0 +1,140 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Smart insights{% endblock %}
+{% block breadcrumb %}Smart insights{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">YOUR MONEY, MADE CLEARER</p>
+      <h1>Smart money assistant</h1>
+      <p class="muted">
+        Ask about this month's spending, budgets, or savings goals.
+      </p>
+    </div>
+    <span class="period-pill">Private · uses your records</span>
+  </div>
+
+  <div class="assistant-layout">
+    <section class="panel assistant-chat">
+      <div class="assistant-intro">
+        <span class="assistant-avatar">✦</span>
+        <div>
+          <h2>Your finance companion</h2>
+          <p class="muted">
+            I can summarize the information in your account.
+          </p>
+        </div>
+      </div>
+
+      <div class="assistant-disclosure">
+        This assistant uses a built-in rules-based guide, not an external AI
+        service. It does not provide professional financial advice.
+      </div>
+
+      <div class="assistant-message assistant-response">
+        <span class="response-icon">✦</span>
+        <div>
+          <strong>{{ answer_title }}</strong>
+          <p>{{ answer }}</p>
+          <small>
+            {{ request.user.first_name|default:request.user.username }}
+            · {{ answer_title }}
+          </small>
+        </div>
+      </div>
+
+      <form method="post" class="assistant-form">
+        {% csrf_token %}
+        <label class="sr-only" for="assistant-question">
+          Ask about your finances
+        </label>
+        <input
+          id="assistant-question"
+          name="question"
+          maxlength="240"
+          value="{{ question }}"
+          placeholder="Ask me about your finances..."
+          autocomplete="off"
+        >
+        <button
+          type="submit"
+          class="send-button"
+          aria-label="Send question"
+        >
+          ➤
+        </button>
+      </form>
+
+      <p class="assistant-hint">
+        Try: “Where did I spend the most?” · “How are my budgets?” ·
+        “How are my savings goals?”
+      </p>
+    </section>
+
+    <aside class="assistant-side">
+      <section class="panel assistant-summary">
+        <p class="eyebrow">THIS MONTH</p>
+        <h2>Your snapshot</h2>
+        <div class="assistant-summary-row">
+          <span>Income</span>
+          <strong>Rs. {{ month_income|floatformat:2 }}</strong>
+        </div>
+        <div class="assistant-summary-row">
+          <span>Expenses</span>
+          <strong>Rs. {{ month_expenses|floatformat:2 }}</strong>
+        </div>
+        <div class="assistant-summary-row">
+          <span>Net savings</span>
+          <strong
+            class="{% if month_net >= 0 %}positive{% else %}negative{% endif %}"
+          >
+            Rs. {{ month_net|floatformat:2 }}
+          </strong>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Expense analysis</h2>
+            <p class="muted">Your largest category this month</p>
+          </div>
+        </div>
+        {% if top_category %}
+          <div class="assistant-highlight">
+            <span class="assistant-highlight-icon">↗</span>
+            <div>
+              <strong>{{ top_category.category }}</strong>
+              <small>
+                Rs. {{ top_category.total|floatformat:2 }} recorded
+              </small>
+            </div>
+          </div>
+        {% else %}
+          <p class="muted">Add expenses to see your top category.</p>
+        {% endif %}
+      </section>
+
+      <section class="panel">
+        <div class="panel-heading">
+          <div>
+            <h2>Goals & budgets</h2>
+            <p class="muted">A quick progress check</p>
+          </div>
+        </div>
+        <div class="assistant-summary-row">
+          <span>Active budgets</span>
+          <strong>{{ budgets|length }}</strong>
+        </div>
+        <div class="assistant-summary-row">
+          <span>Savings goals</span>
+          <strong>{{ goals|length }}</strong>
+        </div>
+        <a class="text-link" href="{% url 'analytics' %}">
+          Explore analytics →
+        </a>
+      </section>
+    </aside>
+  </div>
+{% endblock %}

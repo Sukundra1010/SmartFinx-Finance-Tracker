@@ -1,0 +1,61 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Profile{% endblock %}
+{% block breadcrumb %}Profile & settings{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">your Account</p>
+      <h1>Profile & settings</h1>
+      <p class="muted">
+        Update your personal details and preferences.
+      </p>
+    </div>
+  </div>
+
+  <section class="panel form-panel">
+    <h2>Personal details</h2>
+    <form method="post" enctype="multipart/form-data" class="form-stack">
+      {% csrf_token %}
+      {% if form.instance.image %}
+        <div class="profile-photo-preview">
+          <img src="{{ form.instance.image.url }}" alt="Current profile photo">
+          <span class="muted">Current profile photo</span>
+        </div>
+      {% endif %}
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.name == "image" %}
+            <small class="help">Choose a JPG, PNG, or WebP image up to 5 MB. Leave blank to keep your current photo.</small>
+          {% endif %}
+          {% for error in field.errors %}
+            <small class="error">{{ error }}</small>
+          {% endfor %}
+        </div>
+      {% endfor %}
+      <div class="form-actions">
+        <button type="submit" class="button button-primary">
+          Save profile
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel settings-panel">
+    <div>
+      <h2>Password & security</h2>
+      <p class="muted">
+        Use a strong, unique password to protect your account.
+      </p>
+    </div>
+    <a
+      href="{% url 'password_change' %}"
+      class="button button-secondary"
+    >
+      Change password
+    </a>
+  </section>
+{% endblock %}

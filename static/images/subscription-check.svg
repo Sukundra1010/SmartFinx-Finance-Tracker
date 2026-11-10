@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="tile" x1="20" y1="8" x2="46" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DDF7FF"/>
+      <stop offset=".34" stop-color="#3979A8"/>
+      <stop offset=".68" stop-color="#102B46"/>
+      <stop offset="1" stop-color="#71D8FF"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="8" y1="27" x2="56" y2="39" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#48D9FF"/>
+      <stop offset=".5" stop-color="#F1FCFF"/>
+      <stop offset="1" stop-color="#21C8FF"/>
+    </linearGradient>
+    <filter id="glow" x="0" y="0" width="64" height="64" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="1.4"/>
+    </filter>
+  </defs>
+  <rect x="11.5" y="11.5" width="41" height="41" rx="9" transform="rotate(45 32 32)" fill="#28C8FF" opacity=".55" filter="url(#glow)"/>
+  <rect x="12.5" y="12.5" width="39" height="39" rx="8" transform="rotate(45 32 32)" fill="#071B2E" stroke="url(#edge)" stroke-width="2.4"/>
+  <rect x="16" y="16" width="32" height="32" rx="6" transform="rotate(45 32 32)" fill="url(#tile)" stroke="#D8F7FF" stroke-opacity=".72"/>
+  <path d="m21 32.5 7.4 7.3L43.5 24" stroke="#09263F" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m21 31.5 7.4 7.3L43.5 23" stroke="#F5FCFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

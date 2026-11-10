@@ -1,0 +1,313 @@
+{% extends "finance/base.html" %}
+{% load static %}
+
+{% block title %}Analytics{% endblock %}
+{% block breadcrumb %}Analytics{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">SEE THE BIGGER PICTURE</p>
+      <h1>Financial analytics</h1>
+      <p class="muted">
+        Review yearly profit and loss, transaction history, and your full recorded totals.
+      </p>
+    </div>
+    <div class="analytics-actions">
+      <form method="get" class="year-filter">
+        <label for="analytics-year">Year</label>
+        <select id="analytics-year" name="year">
+          {% for available_year in years %}
+            <option value="{{ available_year }}" {% if available_year == year %}selected{% endif %}>
+              {{ available_year }}
+            </option>
+          {% endfor %}
+        </select>
+        <button class="button button-secondary" type="submit">Show year</button>
+      </form>
+      <a class="button button-secondary" href="{% url 'reports' %}">
+        View reports →
+      </a>
+    </div>
+  </div>
+
+  <h2 class="summary-heading">{{ year }} profit & loss</h2>
+  <div class="stats-grid analytics-stats">
+    <article class="stat-card">
+      <div class="stat-label">Total income</div>
+      <div class="stat-value">Rs. {{ year_income|floatformat:2 }}</div>
+      <div class="stat-note">Recorded in {{ year }}</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Total expenses</div>
+      <div class="stat-value">Rs. {{ year_expenses|floatformat:2 }}</div>
+      <div class="stat-note">Recorded in {{ year }}</div>
+    </article>
+    <article class="stat-card {% if year_net >= 0 %}stat-profit{% else %}stat-loss{% endif %}">
+      <div class="stat-label">
+        {% if year_net >= 0 %}Net profit{% else %}Net loss{% endif %}
+      </div>
+      <div class="stat-value">
+        {% if year_net < 0 %}−{% endif %}Rs. {{ year_net_amount|floatformat:2 }}
+      </div>
+      <div class="stat-note">Income minus expenses</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Transactions</div>
+      <div class="stat-value">{{ year_transaction_count }}</div>
+      <div class="stat-note">Recorded in {{ year }}</div>
+    </article>
+  </div>
+
+  <section class="all-time-summary">
+    <div class="panel-heading">
+      <div>
+        <h2>All-time totals</h2>
+        <p class="muted">Sum of all your recorded transactions across every year</p>
+      </div>
+      <span class="period-pill">{{ all_time_transaction_count }} transactions</span>
+    </div>
+    <div class="stats-grid all-time-stats">
+      <article class="stat-card">
+        <div class="stat-label">Lifetime income</div>
+        <div class="stat-value">Rs. {{ all_time_income|floatformat:2 }}</div>
+      </article>
+      <article class="stat-card">
+        <div class="stat-label">Lifetime expenses</div>
+        <div class="stat-value">Rs. {{ all_time_expenses|floatformat:2 }}</div>
+      </article>
+      <article class="stat-card {% if all_time_net >= 0 %}stat-profit{% else %}stat-loss{% endif %}">
+        <div class="stat-label">
+          {% if all_time_net >= 0 %}Lifetime net profit{% else %}Lifetime net loss{% endif %}
+        </div>
+        <div class="stat-value">
+          {% if all_time_net < 0 %}−{% endif %}Rs. {{ all_time_net_amount|floatformat:2 }}
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="payment-analytics">
+    <div class="panel-heading">
+      <div>
+        <h2>Expenses by payment method</h2>
+        <p class="muted">Actual expense transactions recorded in {{ year }}</p>
+      </div>
+    </div>
+    <div class="stats-grid payment-method-stats">
+      {% for item in payment_method_summary %}
+        <article class="stat-card">
+          <div class="stat-label">{{ item.label }} expenses</div>
+          <div class="stat-value">Rs. {{ item.total|floatformat:2 }}</div>
+          <div class="stat-note">Recorded in {{ year }}</div>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="panel payment-method-chart-panel">
+      {% if payment_method_chart %}
+        <div class="payment-method-chart-wrap">
+          <canvas
+            id="payment-method-chart"
+            aria-label="Expenses by payment method for {{ year }}"
+          ></canvas>
+        </div>
+        <div class="payment-method-legend">
+          {% for item in payment_method_chart %}
+            <div>
+              <i style="--method-color:{{ item.color }}"></i>
+              <span>{{ item.label }}</span>
+              <strong>Rs. {{ item.total|floatformat:2 }}</strong>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state compact">
+          <span class="empty-icon">◈</span>
+          <p>No expenses to group by payment method in {{ year }}.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="content-grid analytics-grid">
+    <section class="panel chart-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Income and expenses</h2>
+          <p class="muted">Monthly totals for {{ year }}</p>
+        </div>
+      </div>
+      <div class="chart-wrap tall">
+        <canvas
+          id="annual-chart"
+          aria-label="Annual income and expense chart for {{ year }}"
+        ></canvas>
+      </div>
+    </section>
+
+    <section class="panel chart-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Category-wise spending</h2>
+          <p class="muted">Spending breakdown for {{ year }}</p>
+        </div>
+      </div>
+
+      {% if category_labels_json != "[]" %}
+        <div class="spending-overview">
+          <div class="donut-wrap">
+            <canvas
+              id="annual-category-chart"
+              aria-label="Annual spending by category"
+            ></canvas>
+          </div>
+          <div class="category-legend">
+            {% for row in category_totals %}
+              <div>
+                <i style="--category-color:{{ row.color }}"></i>
+                <span>{{ row.category }}</span>
+                <strong>{{ row.percentage }}%</strong>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <div class="empty-state compact">
+          <span class="empty-icon">◌</span>
+          <p>No expenses to chart yet.</p>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="panel history-panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Transaction history · {{ year }}</h2>
+        <p class="muted">Every income and expense recorded for the selected year</p>
+      </div>
+    </div>
+    {% if history_transactions %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Transaction</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Payment</th>
+              <th class="align-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in history_transactions %}
+              <tr>
+                <td>{{ item.date|date:"M j, Y" }}</td>
+                <td><strong>{{ item.title }}</strong></td>
+                <td>
+                  <span class="badge {% if item.kind == 'income' %}badge-green{% else %}badge-red{% endif %}">
+                    {{ item.get_kind_display }}
+                  </span>
+                </td>
+                <td>{{ item.category }}</td>
+                <td>
+                  {% if item.payment_method %}
+                    <span class="payment-method-badge">
+                      <span aria-hidden="true">◈</span>
+                      {{ item.get_payment_method_display }}
+                    </span>
+                  {% else %}
+                    <span class="muted">—</span>
+                  {% endif %}
+                </td>
+                <td class="align-right amount {% if item.kind == 'income' %}positive{% else %}negative{% endif %}">
+                  {% if item.kind == 'income' %}+{% else %}−{% endif %}
+                  Rs. {{ item.amount|floatformat:2 }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if history_page.has_other_pages %}
+        <nav class="pagination" aria-label="Transaction history pages">
+          {% if history_page.has_previous %}
+            <a class="button button-quiet" href="?year={{ year }}&amp;history_page={{ history_page.previous_page_number }}">← Previous</a>
+          {% else %}
+            <span></span>
+          {% endif %}
+          <span>Page {{ history_page.number }} of {{ history_page.paginator.num_pages }}</span>
+          {% if history_page.has_next %}
+            <a class="button button-quiet" href="?year={{ year }}&amp;history_page={{ history_page.next_page_number }}">Next →</a>
+          {% else %}
+            <span></span>
+          {% endif %}
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="empty-state compact">
+        <span class="empty-icon">↕</span>
+        <p>No transactions recorded in {{ year }}.</p>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="panel insights-panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Key insights</h2>
+        <p class="muted">Observations based on your recorded activity</p>
+      </div>
+      <span class="insight-mark">✦</span>
+    </div>
+
+    {% if insights %}
+      <ul class="insight-list">
+        {% for insight in insights %}
+          <li>{{ insight }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty-state compact">
+        <span class="empty-icon">✦</span>
+        <p>
+          Add transactions and budgets to get personalized financial insights.
+        </p>
+      </div>
+    {% endif %}
+  </section>
+
+  <script id="annual-labels" type="application/json">
+    {{ labels_json|safe }}
+  </script>
+  <script id="annual-income" type="application/json">
+    {{ income_json|safe }}
+  </script>
+  <script id="annual-expenses" type="application/json">
+    {{ expenses_json|safe }}
+  </script>
+  <script id="annual-category-labels" type="application/json">
+    {{ category_labels_json|safe }}
+  </script>
+  <script id="annual-category-values" type="application/json">
+    {{ category_values_json|safe }}
+  </script>
+  <script id="payment-method-labels" type="application/json">
+    {{ payment_method_labels_json|safe }}
+  </script>
+  <script id="payment-method-values" type="application/json">
+    {{ payment_method_values_json|safe }}
+  </script>
+  <script id="payment-method-colors" type="application/json">
+    {{ payment_method_colors_json|safe }}
+  </script>
+{% endblock %}
+
+{% block scripts %}
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+    defer
+  ></script>
+  <script src="{% static 'js/dashboard.js' %}?v=3" defer></script>
+{% endblock %}

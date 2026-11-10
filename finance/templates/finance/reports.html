@@ -1,0 +1,179 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Reports{% endblock %}
+{% block breadcrumb %}Reports{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">YOUR RECORDS, YOUR WAY</p>
+      <h1>Financial reports</h1>
+      <p class="muted">
+        Review a date range and export a clean, printable summary.
+      </p>
+    </div>
+  </div>
+
+  <section class="panel report-filter">
+    <form method="get" class="filter-bar">
+      <div class="field">
+        <label for="report-period">Report period</label>
+        <select id="report-period" name="period">
+          <option
+            value="custom"
+            {% if selected_period == 'custom' %}selected{% endif %}
+          >
+            Custom range
+          </option>
+          <option
+            value="daily"
+            {% if selected_period == 'daily' %}selected{% endif %}
+          >
+            Today
+          </option>
+          <option
+            value="weekly"
+            {% if selected_period == 'weekly' %}selected{% endif %}
+          >
+            This week
+          </option>
+          <option
+            value="monthly"
+            {% if selected_period == 'monthly' %}selected{% endif %}
+          >
+            This month
+          </option>
+          <option
+            value="yearly"
+            {% if selected_period == 'yearly' %}selected{% endif %}
+          >
+            This year
+          </option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="report-start">From</label>
+        <input
+          id="report-start"
+          type="date"
+          name="start"
+          value="{{ report_start }}"
+        >
+      </div>
+
+      <div class="field">
+        <label for="report-end">To</label>
+        <input
+          id="report-end"
+          type="date"
+          name="end"
+          value="{{ report_end }}"
+        >
+      </div>
+
+      <div class="field">
+        <label for="report-kind">Type</label>
+        <select id="report-kind" name="kind">
+          <option value="">All transactions</option>
+          <option
+            value="income"
+            {% if selected_kind == 'income' %}selected{% endif %}
+          >
+            Income only
+          </option>
+          <option
+            value="expense"
+            {% if selected_kind == 'expense' %}selected{% endif %}
+          >
+            Expenses only
+          </option>
+        </select>
+      </div>
+
+      <button class="button button-primary" type="submit">
+        Generate report
+      </button>
+    </form>
+  </section>
+
+  <div class="stats-grid two-stats report-stats">
+    <article class="stat-card">
+      <div class="stat-label">Report income</div>
+      <div class="stat-value">Rs. {{ income_total|floatformat:2 }}</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">Report expenses</div>
+      <div class="stat-value">Rs. {{ expense_total|floatformat:2 }}</div>
+    </article>
+  </div>
+
+  <section class="panel">
+    <div class="panel-heading">
+      <div>
+        <h2>Report transactions</h2>
+        <p class="muted">
+          {{ transactions|length }} transaction{{ transactions|length|pluralize }}
+          included
+        </p>
+      </div>
+      <div class="row-actions">
+        <button
+          class="button button-quiet"
+          type="button"
+          onclick="window.print()"
+        >
+          Print
+        </button>
+        <a
+          class="button button-secondary"
+          href="{% url 'report_csv' %}?{{ request.GET.urlencode }}"
+        >
+          ↓ CSV
+        </a>
+        <a
+          class="button button-primary"
+          href="{% url 'report_pdf' %}?{{ request.GET.urlencode }}"
+        >
+          ↓ PDF
+        </a>
+      </div>
+    </div>
+
+    {% if transactions %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Transaction</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th class="align-right">Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in transactions %}
+              <tr>
+                <td>{{ item.date|date:"M j, Y" }}</td>
+                <td>{{ item.title }}</td>
+                <td>{{ item.get_kind_display }}</td>
+                <td>{{ item.category }}</td>
+                <td
+                  class="align-right amount {% if item.kind == 'income' %}positive{% else %}negative{% endif %}"
+                >
+                  Rs. {{ item.amount|floatformat:2 }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state compact">
+        <span class="empty-icon">▧</span>
+        <p>No transactions in this date range.</p>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

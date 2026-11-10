@@ -1,0 +1,72 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Payment receipt{% endblock %}
+{% block breadcrumb %}Payment receipt{% endblock %}
+
+{% block content %}
+  <section class="panel payment-receipt">
+    <div class="payment-receipt-heading">
+      <div>
+        <p class="eyebrow">SMARTFINX PAYMENT RECEIPT</p>
+        <h1>{{ payment.get_status_display }}</h1>
+      </div>
+      <span class="payment-status payment-status-{{ payment.status }}">
+        {{ payment.get_status_display }}
+      </span>
+    </div>
+    <dl class="receipt-details">
+      <div>
+        <dt>Plan</dt>
+        <dd>
+          {{ payment.plan_name|default:payment.plan.name }} ·
+          {{ payment.duration_days }} days
+        </dd>
+      </div>
+      <div>
+        <dt>Amount</dt>
+        <dd>Rs. {{ payment.amount|floatformat:2 }} NPR</dd>
+      </div>
+      <div>
+        <dt>Provider</dt>
+        <dd>{{ payment.get_provider_display }}</dd>
+      </div>
+      <div>
+        <dt>Order ID</dt>
+        <dd>{{ payment.order_id }}</dd>
+      </div>
+      <div>
+        <dt>Provider transaction ID</dt>
+        <dd>{{ payment.transaction_id|default:"Not available" }}</dd>
+      </div>
+      <div>
+        <dt>Created</dt>
+        <dd>{{ payment.created_at|date:"M j, Y, P" }}</dd>
+      </div>
+      <div>
+        <dt>Paid at</dt>
+        <dd>{{ payment.paid_at|date:"M j, Y, P"|default:"Not paid" }}</dd>
+      </div>
+    </dl>
+    {% if payment.status_message %}
+      <p class="payment-notice">{{ payment.status_message }}</p>
+    {% endif %}
+    <div class="payment-receipt-actions">
+      <a class="button button-secondary" href="{% url 'payments' %}">Back to payments</a>
+      {% if payment.status == "pending" %}
+        <a
+          class="button button-secondary"
+          href="{% url 'payment_return' payment.order_id %}"
+        >
+          Check payment status
+        </a>
+      {% endif %}
+      <button
+        class="button button-primary"
+        type="button"
+        onclick="window.print()"
+      >
+        Print receipt
+      </button>
+    </div>
+  </section>
+{% endblock %}

@@ -1,0 +1,149 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Savings goals{% endblock %}
+{% block breadcrumb %}Savings goals{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">SMALL STEPS, BIG PLANS</p>
+      <h1>Savings goals</h1>
+      <p class="muted">
+        Turn your plans into progress, one contribution at a time.
+      </p>
+    </div>
+    <a
+      href="{% url 'savings_create' %}"
+      class="button button-primary"
+    >
+      ＋ New goal
+    </a>
+  </div>
+
+  {% if goals %}
+    <div class="goal-grid">
+      {% for goal in goals %}
+        <article class="panel goal-card">
+          <div class="goal-card-top">
+            <span class="goal-icon">◎</span>
+            <div class="budget-actions">
+              <a
+                class="text-link"
+                href="{% url 'savings_edit' goal.pk %}"
+              >
+                Edit
+              </a>
+              <form
+                method="post"
+                action="{% url 'savings_delete' goal.pk %}"
+                onsubmit="return confirm('Delete this savings goal and its contributions?')"
+              >
+                {% csrf_token %}
+                <button class="text-button danger-text" type="submit">
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <div class="goal-heading">
+            <div>
+              <h2>{{ goal.name }}</h2>
+              {% if goal.target_date %}
+                <p class="muted">
+                  Target {{ goal.target_date|date:"M j, Y" }}
+                </p>
+              {% endif %}
+            </div>
+            {% if goal.completed %}
+              <span class="badge badge-green">Completed</span>
+            {% endif %}
+          </div>
+
+          <div class="budget-numbers">
+            <strong>Rs. {{ goal.saved_amount|floatformat:2 }}</strong>
+            <span>of Rs. {{ goal.target_amount|floatformat:2 }}</span>
+          </div>
+          <div class="progress-track large">
+            <div
+              class="progress-fill"
+              style="width:{{ goal.progress }}%"
+            ></div>
+          </div>
+          <div class="budget-foot">
+            <span>{{ goal.progress }}% saved</span>
+            <strong>
+              Rs. {{ goal.remaining_amount|floatformat:2 }} to go
+            </strong>
+          </div>
+
+          <details class="contributions">
+            <summary>
+              Contribution history ({{ goal.contributions.count }})
+            </summary>
+            {% if goal.contributions.all %}
+              <div class="contribution-list">
+                {% for contribution in goal.contributions.all %}
+                  <div class="contribution-row">
+                    <span>
+                      {{ contribution.date|date:"M j, Y" }}
+                      {% if contribution.note %}
+                        <small>{{ contribution.note }}</small>
+                      {% endif %}
+                    </span>
+                    <strong>
+                      Rs. {{ contribution.amount|floatformat:2 }}
+                    </strong>
+                    <span class="row-actions">
+                      <a href="{% url 'contribution_edit' contribution.pk %}">
+                        Edit
+                      </a>
+                      <form
+                        method="post"
+                        action="{% url 'contribution_delete' contribution.pk %}"
+                        onsubmit="return confirm('Delete this contribution?')"
+                      >
+                        {% csrf_token %}
+                        <button
+                          type="submit"
+                          class="text-button danger-text"
+                        >
+                          Delete
+                        </button>
+                      </form>
+                    </span>
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="muted">No contributions yet.</p>
+            {% endif %}
+          </details>
+
+          <a
+            class="button button-secondary button-wide"
+            href="{% url 'contribution_create' goal.pk %}"
+          >
+            ＋ Add contribution
+          </a>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <section class="panel">
+      <div class="empty-state">
+        <span class="empty-icon">◎</span>
+        <h3>Give your savings a destination</h3>
+        <p>
+          Create a goal and track each contribution as you make progress.
+        </p>
+        <a
+          href="{% url 'savings_create' %}"
+          class="button button-secondary"
+        >
+          Create a savings goal
+        </a>
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

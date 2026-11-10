@@ -1,0 +1,120 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Budgets{% endblock %}
+{% block breadcrumb %}Budgets{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">SPEND WITH INTENTION</p>
+      <h1>Monthly budget</h1>
+      <p class="muted">
+        Set category limits and keep your spending on track.
+      </p>
+    </div>
+    <a
+      href="{% url 'budget_create' %}?year={{ current_year }}&month={{ current_month }}"
+      class="button button-primary"
+    >
+      ＋ Create budget
+    </a>
+  </div>
+
+  <div class="month-navigator">
+    <a
+      class="icon-button"
+      href="?year={{ previous_date.year }}&month={{ previous_date.month }}"
+      aria-label="Previous month"
+    >
+      ‹
+    </a>
+    <strong>{{ budget_month_name }} {{ current_year }}</strong>
+    <a
+      class="icon-button"
+      href="?year={{ next_date.year }}&month={{ next_date.month }}"
+      aria-label="Next month"
+    >
+      ›
+    </a>
+  </div>
+
+  {% if budgets %}
+    <div class="budget-grid">
+      {% for budget in budgets %}
+        <article class="panel budget-card">
+          <div class="budget-card-top">
+            <span class="category-mark">{{ budget.category|first|upper }}</span>
+            <div class="budget-actions">
+              <a
+                class="text-link"
+                href="{% url 'budget_edit' budget.pk %}"
+              >
+                Edit
+              </a>
+              <form
+                method="post"
+                action="{% url 'budget_delete' budget.pk %}"
+                onsubmit="return confirm('Delete this budget?')"
+              >
+                {% csrf_token %}
+                <button class="text-button danger-text" type="submit">
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <p class="eyebrow">
+            {{ budget.month|stringformat:"02d" }}/{{ budget.year }}
+          </p>
+          <h2>{{ budget.category }}</h2>
+
+          <div class="budget-numbers">
+            <strong>Rs. {{ budget.spent|floatformat:2 }}</strong>
+            <span>of Rs. {{ budget.amount|floatformat:2 }}</span>
+          </div>
+          <div class="progress-track large">
+            <div
+              class="progress-fill {% if budget.utilization >= 100 %}danger{% elif budget.utilization >= 80 %}warning{% endif %}"
+              style="width:{% if budget.utilization > 100 %}100{% else %}{{ budget.utilization }}{% endif %}%"
+            ></div>
+          </div>
+          <div class="budget-foot">
+            <span>{{ budget.utilization }}% used</span>
+            <strong class="{% if budget.remaining < 0 %}negative{% endif %}">
+              {% if budget.remaining >= 0 %}
+                Rs. {{ budget.remaining|floatformat:2 }} left
+              {% else %}
+                Over by Rs. {{ budget.remaining|stringformat:".2f"|slice:"1:" }}
+              {% endif %}
+            </strong>
+          </div>
+
+          {% if budget.utilization >= 100 %}
+            <div class="budget-alert danger-alert">Budget exceeded</div>
+          {% elif budget.utilization >= 80 %}
+            <div class="budget-alert warning-alert">
+              You have used over 80% of this budget.
+            </div>
+          {% endif %}
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <section class="panel">
+      <div class="empty-state">
+        <span class="empty-icon">▤</span>
+        <h3>No budgets yet</h3>
+        <p>
+          Create a monthly category budget to keep spending intentional.
+        </p>
+        <a
+          href="{% url 'budget_create' %}"
+          class="button button-secondary"
+        >
+          Create your first budget
+        </a>
+      </div>
+    </section>
+  {% endif %}
+{% endblock %}

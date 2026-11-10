@@ -1,0 +1,767 @@
+{% extends "finance/base.html" %}
+{% load static %}
+
+{% block title %}Manage Money. Build Your Future.{% endblock %}
+{% block description %}Manage money with clarity using SmartFinX. Track spending, plan a monthly budget, and build savings goals in one place.{% endblock %}
+{% block body_class %}landing-page{% endblock %}
+
+{% block public_content %}
+  <main class="landing-shell">
+    <header class="landing-header container">
+      <a class="brand" href="{% url 'home' %}" aria-label="SmartFinX home">
+        <img class="brand-icon" src="{% static 'images/smartfinx-icon.png' %}?v=2" alt="SmartFinX icon">
+        <span class="brand-wordmark">SmartFinX</span>
+      </a>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#home">Home</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="secondary-btn pwa-install-button" id="pwa-install" type="button" hidden>
+          Install app
+        </button>
+        <a class="link-btn" href="{% url 'login' %}">Login</a>
+        <a class="primary-btn" href="{% url 'register' %}">Sign Up</a>
+      </div>
+    </header>
+
+    <section id="home" class="hero container">
+      <div class="hero-copy">
+        <p class="eyebrow">FINANCE MADE SIMPLE</p>
+        <h1>
+          Manage your money with clarity.
+        </h1>
+        <p class="hero-text">
+          Manage your finances with confidence using SmartFinX. Track expenses, manage
+          budgets, monitor your savings, and gain clear insights into your spending habits —
+          all in one simple, secure, and intuitive dashboard.
+        </p>
+
+        <div class="hero-actions">
+          <a class="primary-btn" href="{% url 'register' %}">Get Started</a>
+          <a class="secondary-btn" href="#contact">Learn More</a>
+        </div>
+      </div>
+
+      <div class="hero-card" aria-label="Finance dashboard preview">
+        <div class="mini-header">
+          <span>Monthly overview</span>
+          <span class="signal">●</span>
+        </div>
+
+        <div class="amount-row">
+          <div class="amount-box income-box">
+            <small>Income</small>
+            <strong>रु 22,760.23</strong>
+          </div>
+          <div class="amount-box expense-box">
+            <small>Expense</small>
+            <strong>रु 12,760.23</strong>
+          </div>
+        </div>
+
+        <div class="chart" aria-label="Monthly income and expense chart">
+          <div class="chart-bars">
+            <span data-label="38%" style="height: 38%" title="Income 38%"></span>
+            <span data-label="52%" style="height: 52%" title="Expense 52%"></span>
+            <span data-label="44%" style="height: 44%" title="Income 44%"></span>
+            <span data-label="68%" style="height: 68%" title="Expense 68%"></span>
+            <span data-label="60%" style="height: 60%" title="Income 60%"></span>
+            <span data-label="82%" style="height: 82%" title="Expense 82%"></span>
+            <span data-label="70%" style="height: 70%" title="Income 70%"></span>
+            <span data-label="92%" style="height: 92%" title="Expense 92%"></span>
+          </div>
+        </div>
+
+        <div class="mini-summary">
+          <span>Available balance</span>
+          <span class="positive">रु 30,113.80</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="trust-section" aria-label="Trust stats">
+      <div class="trust-row container">
+        <div>
+          <strong>10k+</strong>
+          <span>transactions tracked</span>
+        </div>
+        <div>
+          <strong>4.9/5</strong>
+          <span>user satisfaction</span>
+        </div>
+        <div>
+          <strong>99.9%</strong>
+          <span>secure data protection</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta container" aria-label="Call to action">
+      <div class="cta-box">
+        <div>
+          <p class="eyebrow">Start today</p>
+          <h3>Ready to take control of your finances?</h3>
+        </div>
+        <a class="primary-btn" href="{% url 'register' %}">Create Free Account</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="landing-footer" id="contact">
+    <div class="container footer-bottom">
+      <p class="footer-copyright">© 2026 SmartFinX. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <style>
+    .landing-page {
+      background: radial-gradient(circle at top left, rgba(111, 214, 186, 0.15), transparent 28%),
+        linear-gradient(180deg, #0c1d26, #07171e 35%, #0a1820);
+      color: #edf8f5;
+      min-height: 100vh;
+    }
+
+    .landing-page .landing-shell {
+      padding-bottom: 42px;
+    }
+
+    .landing-page .container {
+      width: min(1200px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .landing-page .landing-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 90px;
+      gap: 20px;
+    }
+
+    .landing-page .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .landing-page .brand-icon {
+      display: block;
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+      border-radius: 14px;
+      box-shadow: 0 10px 22px rgba(34, 211, 238, 0.16);
+    }
+
+    .landing-page .brand-wordmark {
+      color: #edf8f5;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .landing-page .main-nav {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      color: #b4c7c4;
+      font-size: 0.95rem;
+    }
+
+    .landing-page .main-nav a,
+    .landing-page .link-btn {
+      text-decoration: none;
+      color: #b9cdc8;
+      transition: color 0.2s ease;
+    }
+
+    .landing-page .main-nav a:hover,
+    .landing-page .link-btn:hover {
+      color: #edf8f5;
+    }
+
+    .landing-page .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .landing-page .primary-btn,
+    .landing-page .secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      padding: 0 28px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .landing-page .primary-btn {
+      background: linear-gradient(135deg, #7fe4c4, #8edfff);
+      color: #071a22;
+      box-shadow: 0 14px 28px rgba(127, 228, 196, 0.24);
+    }
+
+    .landing-page .primary-btn:hover,
+    .landing-page .secondary-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 20px rgba(5, 18, 24, 0.18);
+    }
+
+    .landing-page .secondary-btn {
+      background: rgba(255, 255, 255, 0.02);
+      color: #edf8f5;
+    }
+
+    .landing-page .hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 42px;
+      align-items: center;
+      min-height: 620px;
+      padding: 36px 0 24px;
+    }
+
+    .landing-page .hero-copy {
+      padding: 10px 0;
+    }
+
+    .landing-page .eyebrow {
+      display: inline-block;
+      margin: 0 0 18px;
+      color: #7fe4c4;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .landing-page .hero h1 {
+      margin: 0;
+      max-width: 700px;
+      font-size: clamp(3.4rem, 6vw, 6rem);
+      line-height: 0.95;
+      letter-spacing: -0.07em;
+      font-weight: 800;
+    }
+
+    .landing-page .hero h1 span {
+      color: #7fe4c4;
+      display: block;
+    }
+
+    .landing-page .hero-text {
+      max-width: 560px;
+      margin-top: 22px;
+      color: #bfd0cc;
+      font-size: 1.12rem;
+      line-height: 1.75;
+    }
+
+    .landing-page .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .landing-page .hero-card {
+      position: relative;
+      padding: 22px 22px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(15, 27, 33, 0.98), rgba(9, 17, 22, 0.96));
+      box-shadow: 0 26px 60px rgba(0, 0, 0, 0.22);
+    }
+
+    .landing-page .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 26px;
+      background: radial-gradient(circle at top right, rgba(127, 228, 196, 0.12), transparent 32%);
+      pointer-events: none;
+    }
+
+    .landing-page .mini-header,
+    .landing-page .amount-row,
+    .landing-page .mini-summary {
+      position: relative;
+      z-index: 1;
+    }
+
+    .landing-page .mini-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      color: #bfd0cc;
+      font-size: 0.95rem;
+    }
+
+    .landing-page .signal {
+      color: #7fe4c4;
+      font-size: 0.9rem;
+    }
+
+    .landing-page .amount-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .landing-page .amount-box {
+      padding: 16px 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .landing-page .income-box small,
+    .landing-page .expense-box small {
+      display: block;
+      margin-bottom: 8px;
+      color: #bfd0cc;
+    }
+
+    .landing-page .amount-box strong {
+      font-size: 1.28rem;
+      font-weight: 700;
+    }
+
+    .landing-page .chart {
+      position: relative;
+      z-index: 1;
+      padding: 18px 14px 12px;
+      border-radius: 18px;
+      background: rgba(11, 23, 32, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+    }
+
+    .landing-page .chart-bars {
+      position: relative;
+      height: 170px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 6px 6px;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.18), rgba(15, 23, 42, 0));
+      background-image: repeating-linear-gradient(
+        to top,
+        rgba(148, 163, 184, 0.15) 0,
+        rgba(148, 163, 184, 0.15) 1px,
+        transparent 1px,
+        transparent 28px
+      );
+      border-radius: 12px;
+      overflow: visible;
+    }
+
+    .landing-page .chart-bars span {
+      position: relative;
+      display: block;
+      width: 100%;
+      max-width: 28px;
+      border-radius: 8px 8px 0 0;
+      background: linear-gradient(180deg, rgba(103, 232, 249, 0.98) 0%, rgba(34, 211, 238, 0.95) 42%, rgba(14, 165, 233, 0.92) 100%);
+      box-shadow: 0 10px 20px rgba(34, 211, 238, 0.18);
+      border: 1px solid rgba(110, 231, 255, 0.55);
+      transition: transform 0.25s ease, box-shadow 0.25s ease, filter 0.25s ease;
+      cursor: pointer;
+    }
+
+    .landing-page .chart-bars span:nth-child(even) {
+      background: linear-gradient(180deg, rgba(196, 181, 253, 0.96) 0%, rgba(139, 92, 246, 0.96) 42%, rgba(109, 40, 217, 0.92) 100%);
+      box-shadow: 0 10px 20px rgba(139, 92, 246, 0.22);
+      border-color: rgba(192, 132, 252, 0.55);
+    }
+
+    .landing-page .chart-bars span:hover {
+      transform: translateY(-5px) scaleY(1.02);
+      filter: brightness(1.08);
+      box-shadow: 0 16px 26px rgba(34, 211, 238, 0.2);
+    }
+
+    .landing-page .chart-bars span:nth-child(even):hover {
+      box-shadow: 0 16px 26px rgba(139, 92, 246, 0.25);
+    }
+
+    .landing-page .chart-bars span::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 10px);
+      transform: translateX(-50%) translateY(6px);
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      color: #e2e8f0;
+      font-size: 10px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 2;
+    }
+
+    .landing-page .chart-bars span:hover::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .landing-page .mini-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 16px;
+      color: #bfd0cc;
+      font-weight: 600;
+    }
+
+    .landing-page .positive {
+      color: #7fe4c4;
+    }
+
+    .landing-page .trust-section {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: 76px 20px;
+      background:
+        radial-gradient(ellipse at 50% 45%, rgba(37, 99, 235, 0.14), transparent 58%),
+        linear-gradient(135deg, #020617, #0b1120 55%, #020617);
+    }
+
+    .landing-page .trust-section::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      content: "";
+      background: radial-gradient(ellipse at 50% 0%, rgba(96, 165, 250, 0.12), transparent 55%);
+      pointer-events: none;
+    }
+
+    .landing-page .trust-row {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      max-width: 760px;
+      gap: 0;
+      padding: 18px 44px;
+      text-align: center;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.58), rgba(15, 23, 42, 0.48));
+      box-shadow:
+        0 30px 80px rgba(0, 0, 0, 0.38),
+        0 0 60px rgba(59, 130, 246, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .landing-page .trust-row::before {
+      position: absolute;
+      inset: 1px 1px auto;
+      height: 45%;
+      border-radius: 27px 27px 50% 50%;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent);
+      content: "";
+      pointer-events: none;
+    }
+
+    .landing-page .trust-row > div {
+      position: relative;
+      display: flex;
+      min-height: 154px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.25s ease;
+    }
+
+    .landing-page .trust-row > div + div::before {
+      position: absolute;
+      top: 0;
+      right: 12%;
+      left: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.48), transparent);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+      content: "";
+    }
+
+    .landing-page .trust-row > div:hover {
+      transform: translateY(-2px);
+    }
+
+    .landing-page .trust-row strong {
+      display: block;
+      color: #f8fafc;
+      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      font-weight: 750;
+      letter-spacing: -0.065em;
+      line-height: 1;
+      text-shadow: 0 4px 24px rgba(147, 197, 253, 0.12);
+    }
+
+    .landing-page .trust-row span {
+      margin-top: 14px;
+      color: #aab8ca;
+      font-size: 1rem;
+      letter-spacing: 0.01em;
+      text-transform: none;
+    }
+
+    @media (max-width: 600px) {
+      .landing-page .trust-section {
+        padding: 54px 16px;
+      }
+
+      .landing-page .trust-row {
+        padding: 12px 20px;
+        border-radius: 22px;
+      }
+
+      .landing-page .trust-row > div {
+        min-height: 132px;
+      }
+    }
+
+    .landing-page .section-heading {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .landing-page .section-heading h2 {
+      margin: 0;
+      font-size: clamp(2.2rem, 3vw, 3rem);
+      letter-spacing: -0.05em;
+    }
+
+    .landing-page .features,
+    .landing-page .steps,
+    .landing-page .reviews {
+      padding-top: 82px;
+    }
+
+    .landing-page .feature-grid,
+    .landing-page .steps-grid,
+    .landing-page .review-grid {
+      display: grid;
+      gap: 22px;
+    }
+
+    .landing-page .feature-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .landing-page .feature-card,
+    .landing-page .step-card,
+    .landing-page .review-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px;
+      padding: 24px 22px;
+    }
+
+    .landing-page .feature-icon {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      font-size: 1.25rem;
+      margin-bottom: 18px;
+    }
+
+    .landing-page .feature-icon.green {
+      background: rgba(127, 228, 196, 0.12);
+      color: #7fe4c4;
+    }
+
+    .landing-page .feature-icon.gold {
+      background: rgba(225, 202, 159, 0.12);
+      color: #e3c68e;
+    }
+
+    .landing-page .feature-icon.blue {
+      background: rgba(146, 211, 255, 0.12);
+      color: #90d5ff;
+    }
+
+    .landing-page .feature-card h3,
+    .landing-page .step-card h3 {
+      margin: 0 0 12px;
+      font-size: 1.5rem;
+    }
+
+    .landing-page .feature-card p,
+    .landing-page .step-card p,
+    .landing-page .review-card p {
+      margin: 0;
+      color: #bfd0cc;
+      line-height: 1.7;
+    }
+
+    .landing-page .steps-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .landing-page .step-card span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      background: rgba(127, 228, 196, 0.12);
+      color: #7fe4c4;
+      font-weight: 700;
+    }
+
+    .landing-page .review-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .landing-page .review-card {
+      min-height: 170px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .landing-page .review-author {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 18px;
+    }
+
+    .landing-page .review-author small {
+      color: #bfd0cc;
+    }
+
+    .landing-page .cta {
+      padding-top: 82px;
+    }
+
+    .landing-page .cta-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 26px;
+      padding: 30px 32px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .landing-page .cta-box h3 {
+      margin: 0;
+      font-size: clamp(2rem, 3vw, 3rem);
+      letter-spacing: -0.05em;
+    }
+
+    .landing-page .landing-footer {
+      margin-top: 58px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .landing-page .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px 24px;
+      padding: 18px 20px 28px;
+      color: #bfd0cc;
+      font-size: 0.9rem;
+    }
+
+    .landing-page .footer-bottom p {
+      margin: 0;
+    }
+
+    .landing-page .pwa-install-button[hidden] {
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      .landing-page .footer-bottom {
+        align-items: center;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .landing-page .hero,
+      .landing-page .feature-grid,
+      .landing-page .steps-grid,
+      .landing-page .review-grid,
+      .landing-page .trust-row {
+        grid-template-columns: 1fr;
+      }
+
+      .landing-page .main-nav {
+        display: none;
+      }
+
+      .landing-page .cta-box {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .landing-page .landing-header {
+        min-height: 76px;
+      }
+
+      .landing-page .brand {
+        font-size: 1.6rem;
+      }
+
+      .landing-page .nav-actions {
+        gap: 10px;
+      }
+
+      .landing-page .primary-btn,
+      .landing-page .secondary-btn {
+        min-height: 46px;
+        padding: 0 20px;
+      }
+
+      .landing-page .hero {
+        min-height: auto;
+        padding-top: 18px;
+      }
+
+      .landing-page .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .landing-page .cta-box {
+        padding: 24px 18px;
+      }
+
+    }
+  </style>
+{% endblock %}

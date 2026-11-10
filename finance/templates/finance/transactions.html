@@ -1,0 +1,237 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Transactions{% endblock %}
+{% block breadcrumb %}Transactions{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">YOUR MONEY, ACCOUNTED FOR</p>
+      <h1>Transactions</h1>
+      <p class="muted">
+        Search, filter, and manage your income and expenses.
+      </p>
+    </div>
+    <a
+      href="{% url 'transaction_create' %}"
+      class="button button-primary"
+    >
+      ＋ Add transaction
+    </a>
+  </div>
+
+  <section class="panel">
+    <form method="get" class="filter-bar">
+      <input
+        type="search"
+        name="q"
+        value="{{ query }}"
+        placeholder="Search transactions"
+        aria-label="Search transactions"
+      >
+
+      <select name="kind" aria-label="Transaction type">
+        <option value="">All types</option>
+        <option
+          value="income"
+          {% if selected_kind == 'income' %}selected{% endif %}
+        >
+          Income
+        </option>
+        <option
+          value="expense"
+          {% if selected_kind == 'expense' %}selected{% endif %}
+        >
+          Expense
+        </option>
+      </select>
+
+      <select name="category" aria-label="Category">
+        <option value="">All categories</option>
+        {% for value, label in category_choices %}
+          <option
+            value="{{ value }}"
+            {% if selected_category == value %}selected{% endif %}
+          >
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <select name="payment_method" aria-label="Payment method">
+        <option value="">All payment methods</option>
+        {% for value, label in payment_method_choices %}
+          <option
+            value="{{ value }}"
+            {% if selected_payment_method == value %}selected{% endif %}
+          >
+            {{ label }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <input
+        type="date"
+        name="start"
+        value="{{ selected_start }}"
+        aria-label="Start date"
+      >
+      <input
+        type="date"
+        name="end"
+        value="{{ selected_end }}"
+        aria-label="End date"
+      >
+
+      <select name="sort" aria-label="Sort transactions">
+        <option
+          value="newest"
+          {% if selected_sort == 'newest' %}selected{% endif %}
+        >
+          Newest first
+        </option>
+        <option
+          value="oldest"
+          {% if selected_sort == 'oldest' %}selected{% endif %}
+        >
+          Oldest first
+        </option>
+        <option
+          value="amount"
+          {% if selected_sort == 'amount' %}selected{% endif %}
+        >
+          Highest amount
+        </option>
+        <option
+          value="-amount"
+          {% if selected_sort == '-amount' %}selected{% endif %}
+        >
+          Lowest amount
+        </option>
+      </select>
+
+      <button class="button button-secondary" type="submit">Apply</button>
+      <a class="text-link" href="{% url 'transactions' %}">Reset</a>
+    </form>
+
+    {% if transactions %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Transaction</th>
+              <th>Type</th>
+              <th>Category</th>
+              <th>Payment</th>
+              <th>Date</th>
+              <th class="align-right">Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in transactions %}
+              <tr>
+                <td>
+                  <strong>{{ item.title }}</strong>
+                  {% if item.description %}
+                    <small class="table-subtitle">
+                      {{ item.description|truncatechars:54 }}
+                    </small>
+                  {% endif %}
+                </td>
+                <td>
+                  <span
+                    class="badge {% if item.kind == 'income' %}badge-green{% else %}badge-red{% endif %}"
+                  >
+                    {{ item.get_kind_display }}
+                  </span>
+                </td>
+                <td>{{ item.category }}</td>
+                <td>
+                  {% if item.payment_method %}
+                    <span class="payment-method-badge">
+                      <span aria-hidden="true">◈</span>
+                      {{ item.get_payment_method_display }}
+                    </span>
+                  {% else %}
+                    <span class="muted">—</span>
+                  {% endif %}
+                </td>
+                <td>{{ item.date|date:"M j, Y" }}</td>
+                <td
+                  class="align-right amount {% if item.kind == 'income' %}positive{% else %}negative{% endif %}"
+                >
+                  {% if item.kind == 'income' %}+{% else %}−{% endif %}
+                  Rs. {{ item.amount|floatformat:2 }}
+                </td>
+                <td>
+                  <div class="row-actions">
+                    <a
+                      href="{% url 'transaction_edit' item.pk %}"
+                      class="text-link"
+                    >
+                      Edit
+                    </a>
+                    <form
+                      method="post"
+                      action="{% url 'transaction_delete' item.pk %}"
+                      onsubmit="return confirm('Delete this transaction?')"
+                    >
+                      {% csrf_token %}
+                      <button
+                        class="text-button danger-text"
+                        type="submit"
+                      >
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a
+            class="button button-quiet"
+            href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}"
+          >
+            ← Previous
+          </a>
+        {% else %}
+          <span></span>
+        {% endif %}
+
+        <span>
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+          <a
+            class="button button-quiet"
+            href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}"
+          >
+            Next →
+          </a>
+        {% else %}
+          <span></span>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-icon">↕</span>
+        <h3>No matching transactions</h3>
+        <p>Try changing your filters, or add your first transaction.</p>
+        <a
+          href="{% url 'transaction_create' %}"
+          class="button button-secondary"
+        >
+          Add transaction
+        </a>
+      </div>
+    {% endif %}
+  </section>
+{% endblock %}

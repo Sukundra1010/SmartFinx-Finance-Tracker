@@ -1,0 +1,46 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Notifications{% endblock %}
+{% block breadcrumb %}Notifications{% endblock %}
+
+{% block content %}
+  <div class="page-heading">
+    <div>
+      <p class="eyebrow">STAY IN THE LOOP</p>
+      <h1>Notifications</h1>
+      <p class="muted">Budget milestones and savings updates.</p>
+    </div>
+    {% if notifications %}
+      <form method="post" action="{% url 'notifications_read_all' %}">
+        {% csrf_token %}
+        <button class="button button-secondary" type="submit">
+          Mark all as read
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  <section class="panel notification-list">
+    {% for item in notifications %}
+      <article
+        class="notification-item {% if not item.read_at %}unread{% endif %}"
+      >
+        <span class="notification-dot"></span>
+        <div>
+          <p>{{ item.message }}</p>
+          <small class="muted">
+            {{ item.created_at|date:"M j, Y · g:i A" }}
+          </small>
+        </div>
+      </article>
+    {% empty %}
+      <div class="empty-state">
+        <span class="empty-icon notification-empty-icon">
+          {% include "finance/partials/notification_icon.html" %}
+        </span>
+        <h3>You're all caught up</h3>
+        <p>Important budget and savings updates will show here.</p>
+      </div>
+    {% endfor %}
+  </section>
+{% endblock %}

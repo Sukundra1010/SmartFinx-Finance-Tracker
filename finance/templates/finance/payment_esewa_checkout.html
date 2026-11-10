@@ -1,0 +1,36 @@
+{% extends "finance/base.html" %}
+
+{% block title %}Secure eSewa checkout{% endblock %}
+{% block breadcrumb %}Secure checkout{% endblock %}
+
+{% block content %}
+  <section class="panel payment-checkout">
+    <p class="eyebrow">ESEWA SANDBOX</p>
+    <h1>Continue to eSewa</h1>
+    <p class="muted">
+      Review your subscription payment. Your payment remains pending until eSewa confirms it
+      and SmartFinX verifies it with the provider.
+    </p>
+    <div class="receipt-summary">
+      <span>
+        {{ payment.plan_name|default:payment.plan.name }} ·
+        {{ payment.duration_days }} days
+      </span>
+      <strong>Rs. {{ payment.amount|floatformat:2 }}</strong>
+      <small>Order {{ payment.order_id }}</small>
+    </div>
+    <form method="post" action="{{ gateway_url }}" class="payment-checkout-form">
+      {% for name, value in fields.items %}
+        <input type="hidden" name="{{ name }}" value="{{ value }}">
+      {% endfor %}
+      <button class="button button-primary" type="submit">
+        Continue to eSewa sandbox
+      </button>
+      <a class="button button-secondary" href="{% url 'payments' %}">Cancel</a>
+    </form>
+    <p class="muted payment-security-note">
+      Credentials, PINs, and OTPs are entered only on eSewa. SmartFinX never
+      collects or stores them.
+    </p>
+  </section>
+{% endblock %}

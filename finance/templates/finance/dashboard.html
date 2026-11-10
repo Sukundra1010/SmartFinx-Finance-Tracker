@@ -1,0 +1,326 @@
+{% extends "finance/base.html" %}
+{% load static %}
+
+{% block title %}Overview{% endblock %}
+{% block breadcrumb %}Overview{% endblock %}
+
+{% block content %}
+  <div class="page-heading dashboard-heading">
+    <div>
+      <p class="eyebrow">YOUR FINANCES AT A GLANCE</p>
+      <h1>Hello, {{ user.first_name|default:user.username }} 👋</h1>
+      <p class="muted">Take control of your finances today!</p>
+    </div>
+    <div class="dashboard-actions">
+      <a
+        class="button button-primary dashboard-add-button"
+        href="{% url 'transaction_create' %}"
+      >
+        ＋ Add transaction
+      </a>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <article class="stat-card stat-primary">
+      <div class="stat-label">
+        Total balance <span class="stat-icon">◈</span>
+      </div>
+      <div class="stat-value">Rs. {{ balance|floatformat:2 }}</div>
+      <div class="stat-note">Across all recorded transactions</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">
+        Income this month <span class="stat-icon green">↗</span>
+      </div>
+      <div class="stat-value">Rs. {{ monthly_income|floatformat:2 }}</div>
+      <div class="stat-note">Money received this month</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">
+        Expenses this month <span class="stat-icon red">↘</span>
+      </div>
+      <div class="stat-value">Rs. {{ monthly_expenses|floatformat:2 }}</div>
+      <div class="stat-note">Money spent this month</div>
+    </article>
+    <article class="stat-card">
+      <div class="stat-label">
+        Monthly savings <span class="stat-icon violet">◎</span>
+      </div>
+      <div class="stat-value">Rs. {{ monthly_savings|floatformat:2 }}</div>
+      <div class="stat-note">{{ savings_rate }}% savings rate</div>
+    </article>
+    <article class="stat-card stat-budget">
+      <div class="stat-label">
+        Monthly budget <span class="stat-icon">▤</span>
+      </div>
+      <div class="stat-value">Rs. {{ monthly_budget|floatformat:2 }}</div>
+      <div class="stat-note">Across this month's category limits</div>
+      <a class="stat-budget-action" href="{% url 'budget_create' %}">
+        ＋ Create budget
+      </a>
+    </article>
+  </div>
+
+  <div class="content-grid dashboard-grid">
+    <section class="panel chart-panel trend-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Income vs expenses</h2>
+          <p class="muted">Monthly activity over the last six months</p>
+        </div>
+        <span class="period-pill">6 months</span>
+      </div>
+      <div class="chart-wrap">
+        <canvas
+          id="overview-chart"
+          aria-label="Monthly income and expense chart"
+        ></canvas>
+      </div>
+    </section>
+
+    <section class="panel chart-panel spending-panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Spending overview</h2>
+          <p class="muted">This month's expenses</p>
+        </div>
+        <a class="period-pill" href="{% url 'analytics' %}">This month ›</a>
+      </div>
+
+      {% if category_labels_json != "[]" %}
+        <div class="spending-overview">
+          <div class="donut-wrap">
+            <canvas
+              id="category-chart"
+              aria-label="Expense categories chart"
+            ></canvas>
+          </div>
+          <div class="category-legend">
+            {% for row in category_totals %}
+              <div>
+                <i style="--category-color:{{ row.color }}"></i>
+                <span>{{ row.category }}</span>
+                <strong>{{ row.percentage }}%</strong>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <div class="empty-state compact">
+          <span class="empty-icon">◌</span>
+          <p>No expenses to chart yet.</p>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+
+  <div class="content-grid dashboard-grid lower-grid">
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Recent transactions</h2>
+          <p class="muted">Your latest financial activity</p>
+        </div>
+        <a class="text-link" href="{% url 'transactions' %}">View all →</a>
+      </div>
+
+      {% if recent_transactions %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Transaction</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th class="align-right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in recent_transactions %}
+                <tr>
+                  <td>
+                    <span
+                      class="transaction-icon {% if item.kind == 'income' %}income-icon{% else %}expense-icon{% endif %}"
+                    >
+                      {% if item.kind == 'income' %}↙{% else %}↗{% endif %}
+                    </span>
+                    <strong>{{ item.title }}</strong>
+                  </td>
+                  <td>{{ item.category }}</td>
+                  <td>{{ item.date|date:"M j, Y" }}</td>
+                  <td
+                    class="align-right amount {% if item.kind == 'income' %}positive{% else %}negative{% endif %}"
+                  >
+                    {% if item.kind == 'income' %}+{% else %}−{% endif %}
+                    Rs. {{ item.amount|floatformat:2 }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mobile-recent-list">
+          {% for item in recent_transactions %}
+            <div class="mobile-recent-row">
+              <span
+                class="transaction-icon {% if item.kind == 'income' %}income-icon{% else %}expense-icon{% endif %}"
+              >
+                {% if item.kind == 'income' %}↙{% else %}↗{% endif %}
+              </span>
+              <div class="mobile-recent-description">
+                <strong>{{ item.title }}</strong>
+                <small>{{ item.date|date:"M j, Y" }}</small>
+              </div>
+              <strong
+                class="amount {% if item.kind == 'income' %}positive{% else %}negative{% endif %}"
+              >
+                {% if item.kind == 'income' %}+{% else %}−{% endif %}
+                Rs. {{ item.amount|floatformat:2 }}
+              </strong>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <span class="empty-icon">↕</span>
+          <h3>No activity yet</h3>
+          <p>Add your first income or expense to see your finances here.</p>
+          <a
+            href="{% url 'transaction_create' %}"
+            class="button button-secondary"
+          >
+            Add transaction
+          </a>
+        </div>
+      {% endif %}
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <div>
+          <h2>Monthly budgets</h2>
+          <p class="muted">Your spending limits</p>
+        </div>
+        <a class="text-link" href="{% url 'budgets' %}">Manage →</a>
+      </div>
+
+      {% if budgets %}
+        <div class="progress-list">
+          {% for budget in budgets %}
+            <div class="progress-item">
+              <div class="progress-title">
+                <strong>{{ budget.category }}</strong>
+                <span>
+                  Rs. {{ budget.spent|floatformat:0 }} /
+                  {{ budget.amount|floatformat:0 }}
+                </span>
+              </div>
+              <div class="progress-track">
+                <div
+                  class="progress-fill {% if budget.utilization >= 100 %}danger{% elif budget.utilization >= 80 %}warning{% endif %}"
+                  style="width:{{ budget.utilization }}%"
+                ></div>
+              </div>
+              <small class="muted">
+                {% if budget.remaining >= 0 %}
+                  Rs. {{ budget.remaining|floatformat:2 }} remaining
+                {% else %}
+                  Rs. {{ budget.remaining|stringformat:".2f"|slice:"1:" }}
+                  over budget
+                {% endif %}
+              </small>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state compact">
+          <span class="empty-icon">▤</span>
+          <p>No budgets set for this month.</p>
+          <a href="{% url 'budget_create' %}" class="text-link">
+            Create a budget →
+          </a>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="panel dashboard-goals mobile-hide">
+    <div class="panel-heading">
+      <div>
+        <h2>Savings progress</h2>
+        <p class="muted">Keep your goals moving forward</p>
+      </div>
+      <a class="text-link" href="{% url 'savings' %}">All goals →</a>
+    </div>
+
+    {% if goals %}
+      <div class="goal-progress-grid">
+        {% for goal in goals %}
+          <div class="goal-progress-item">
+            <div class="progress-title">
+              <strong>{{ goal.name }}</strong>
+              <span>{{ goal.progress }}%</span>
+            </div>
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                style="width:{{ goal.progress }}%"
+              ></div>
+            </div>
+            <small class="muted">
+              Rs. {{ goal.saved_amount|floatformat:0 }} saved of
+              Rs. {{ goal.target_amount|floatformat:0 }}
+            </small>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state compact">
+        <span class="empty-icon">◎</span>
+        <p>No savings goals yet.</p>
+        <a href="{% url 'savings_create' %}" class="text-link">
+          Create a goal →
+        </a>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="panel assistant-teaser mobile-hide">
+    <div class="assistant-teaser-icon">✦</div>
+    <div>
+      <h2>Smart money insights</h2>
+      <p class="muted">
+        Get a quick, data-based read on your spending, budgets, and goals.
+      </p>
+    </div>
+    <a class="button button-secondary" href="{% url 'assistant' %}">
+      Open assistant →
+    </a>
+  </section>
+
+  <script id="month-labels" type="application/json">
+    {{ month_labels_json|safe }}
+  </script>
+  <script id="income-series" type="application/json">
+    {{ income_series_json|safe }}
+  </script>
+  <script id="expense-series" type="application/json">
+    {{ expense_series_json|safe }}
+  </script>
+  <script id="category-labels" type="application/json">
+    {{ category_labels_json|safe }}
+  </script>
+  <script id="category-series" type="application/json">
+    {{ category_series_json|safe }}
+  </script>
+{% endblock %}
+
+{% block scripts %}
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+    defer
+  ></script>
+  <script src="{% static 'js/dashboard.js' %}?v=3" defer></script>
+{% endblock %}

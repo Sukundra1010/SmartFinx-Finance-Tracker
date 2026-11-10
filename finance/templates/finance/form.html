@@ -1,0 +1,149 @@
+{% extends "finance/base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block breadcrumb %}{{ title }}{% endblock %}
+
+{% block content %}
+  <div class="page-heading form-heading">
+    <div>
+      <p class="eyebrow">MANAGE YOUR MONEY</p>
+      <h1>{{ title }}</h1>
+      <p class="muted">
+        Enter the details below. Amounts are recorded in Nepalese rupees.
+      </p>
+    </div>
+  </div>
+
+  <section class="panel form-panel">
+    <form method="post" class="form-stack">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="form-errors">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      {% for field in form %}
+        {% if field.name == "kind" %}
+          <div class="field transaction-kind-field">
+            <label>Type</label>
+            <div class="kind-switch" role="group" aria-label="Transaction type">
+              <button type="button" data-kind-pick="expense">Expense</button>
+              <button type="button" data-kind-pick="income">Income</button>
+            </div>
+            {{ field }}
+            {% for error in field.errors %}
+              <small class="error">{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% elif field.name == "amount" %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            <div class="amount-input">
+              <span>Rs.</span>
+              {{ field }}
+            </div>
+            {% for error in field.errors %}
+              <small class="error">{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% elif field.name == "payment_method" %}
+          <div class="field payment-method-field">
+            <div class="payment-method-label">
+              <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+              <span class="optional-label">Optional</span>
+            </div>
+            <div class="payment-method-control">
+              <span aria-hidden="true">◈</span>
+              {{ field }}
+            </div>
+            {% for error in field.errors %}
+              <small class="error">{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+              <small class="help">{{ field.help_text|safe }}</small>
+            {% endif %}
+            {% for error in field.errors %}
+              <small class="error">{{ error }}</small>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      {% if form.kind %}
+        <div class="quick-categories">
+          <span class="quick-label">Quick categories</span>
+          <div class="quick-category-grid">
+            <button
+              type="button"
+              class="quick-category"
+              data-category-pick="Food"
+            >
+              <span>🍴</span>Food
+            </button>
+            <button
+              type="button"
+              class="quick-category"
+              data-category-pick="Transportation"
+            >
+              <span>↗</span>Transport
+            </button>
+            <button
+              type="button"
+              class="quick-category"
+              data-category-pick="Shopping"
+            >
+              <span>▣</span>Shopping
+            </button>
+            <button
+              type="button"
+              class="quick-category"
+              data-category-pick="Education"
+            >
+              <span>◆</span>Education
+            </button>
+            <button
+              type="button"
+              class="quick-category"
+              data-category-pick="Entertainment"
+            >
+              <span>♫</span>Fun
+            </button>
+            <button
+              type="button"
+              class="quick-category"
+              data-category-pick="Healthcare"
+            >
+              <span>＋</span>Health
+            </button>
+            <button
+              type="button"
+              class="quick-category"
+              data-category-pick="Bills"
+            >
+              <span>▤</span>Bills
+            </button>
+            <button
+              type="button"
+              class="quick-category"
+              data-category-pick="Other"
+            >
+              <span>···</span>Other
+            </button>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="form-actions">
+        <a class="button button-quiet" href="{% url cancel_url %}">Cancel</a>
+        <button type="submit" class="button button-primary">
+          {{ submit_label|default:"Save changes" }}
+        </button>
+      </div>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% load static %}
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="description" content="{% block description %}SmartFinX helps you track spending, plan budgets, and build savings goals in one clear place.{% endblock %}">
+  <link rel="icon" type="image/png" href="{% static 'images/smartfinx-icon.png' %}?v=2">
+  <link rel="apple-touch-icon" href="{% static 'images/smartfinx-icon-192.png' %}">
+  <link rel="manifest" href="{% static 'pwa/manifest.webmanifest' %}">
+  <title>{% block title %}smartFinX{% endblock %} · smartFinX</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}?v=10">
+  {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+{% if user.is_authenticated %}
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="{% url 'dashboard' %}">
+        <img class="brand-logo brand-logo-light" src="{% static 'images/smartfinx-logo.png' %}?v=2" alt="SmartFinX">
+        <img class="brand-logo brand-logo-dark" src="{% static 'images/smartfinx-logo-dark.png' %}?v=1" alt="" aria-hidden="true">
+      </a>
+
+      <div class="side-label">Workspace</div>
+      <nav class="side-nav" aria-label="Main navigation">
+        <a
+          href="{% url 'dashboard' %}"
+          class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+        >
+          <span>◫</span> Overview
+        </a>
+        <a
+          href="{% url 'transactions' %}"
+          class="{% if request.resolver_match.url_name == 'transactions' %}active{% endif %}"
+        >
+          <span>↕</span> Transactions
+        </a>
+        <a
+          href="{% url 'budgets' %}"
+          class="{% if request.resolver_match.url_name == 'budgets' %}active{% endif %}"
+        >
+          <span>▤</span> Budgets
+        </a>
+        <a
+          href="{% url 'savings' %}"
+          class="{% if request.resolver_match.url_name == 'savings' %}active{% endif %}"
+        >
+          <span>◎</span> Savings goals
+        </a>
+        <a
+          href="{% url 'analytics' %}"
+          class="{% if request.resolver_match.url_name == 'analytics' %}active{% endif %}"
+        >
+          <span>▥</span> Analytics
+        </a>
+        <a
+          href="{% url 'assistant' %}"
+          class="{% if request.resolver_match.url_name == 'assistant' %}active{% endif %}"
+        >
+          <span>✦</span> Smart insights
+        </a>
+        <a
+          href="{% url 'reports' %}"
+          class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}"
+        >
+          <span>▧</span> Reports
+        </a>
+        <a
+          href="{% url 'payments' %}"
+          class="{% if request.resolver_match.url_name == 'payments' %}active{% endif %}"
+        >
+          <span>◈</span> Payments
+        </a>
+      </nav>
+
+      <div class="side-label side-label-bottom">Account</div>
+      <nav class="side-nav">
+        <a
+          href="{% url 'notifications' %}"
+          class="{% if request.resolver_match.url_name == 'notifications' %}active{% endif %}"
+        >
+          <span class="side-notification-icon">{% include "finance/partials/notification_icon.html" %}</span>
+          Notifications
+        </a>
+        <a
+          href="{% url 'profile' %}"
+          class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
+        >
+          <span class="side-settings-icon">{% include "finance/partials/settings_icon.html" %}</span>
+          Profile & settings
+        </a>
+      </nav>
+
+      <div class="sidebar-user">
+        {% if user.profile.image %}
+          <img class="avatar avatar-photo" src="{{ user.profile.image.url }}" alt="">
+        {% else %}
+          <div class="avatar">
+            {{ user.first_name|default:user.username|first|upper }}
+          </div>
+        {% endif %}
+        <div class="user-meta">
+          <strong>{{ user.get_full_name|default:user.username }}</strong>
+          <small>Personal account</small>
+        </div>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button class="icon-button" title="Sign out" aria-label="Sign out">
+            ↗
+          </button>
+        </form>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button
+          class="icon-button menu-toggle"
+          id="menu-toggle"
+          aria-label="Toggle navigation"
+        >
+          ☰
+        </button>
+        <a class="brand mobile-brand" href="{% url 'dashboard' %}">
+          <img class="brand-logo brand-logo-light" src="{% static 'images/smartfinx-logo.png' %}?v=2" alt="SmartFinX">
+          <img class="brand-logo brand-logo-dark" src="{% static 'images/smartfinx-logo-dark.png' %}?v=1" alt="" aria-hidden="true">
+        </a>
+        <div class="breadcrumb">
+          Personal finance <span>/</span>
+          {% block breadcrumb %}Overview{% endblock %}
+        </div>
+        <div class="topbar-actions">
+          <a
+            class="icon-button mobile-analytics"
+            href="{% url 'analytics' %}"
+            aria-label="Analytics"
+          >
+            ▥
+          </a>
+          <button class="pwa-install-button" id="pwa-install" type="button" hidden>
+            Install app
+          </button>
+          <a
+            class="icon-button payment-nav-link"
+            href="{% url 'payments' %}"
+            aria-label="Payments"
+          >
+            <img
+              src="{% static 'images/subscription-check.svg' %}"
+              alt=""
+              aria-hidden="true"
+            >
+          </a>
+          <a
+            class="icon-button"
+            href="{% url 'notifications' %}"
+            aria-label="Notifications"
+          >
+            {% include "finance/partials/notification_icon.html" %}
+          </a>
+          <button
+            class="icon-button theme-toggle"
+            id="theme-toggle"
+            type="button"
+            aria-label="Toggle color theme"
+            aria-pressed="false"
+            title="Toggle light and dark theme"
+          >
+            <img src="{% static 'images/theme-mode.png' %}?v=2" alt="" aria-hidden="true">
+          </button>
+        </div>
+      </header>
+
+      <section class="page-content">
+        {% if messages %}
+          <div class="messages">
+            {% for message in messages %}
+              <div class="alert {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+
+    <nav class="mobile-nav" aria-label="Mobile navigation">
+      <a
+        href="{% url 'dashboard' %}"
+        class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
+      >
+        <span>⌂</span>
+        <small>Home</small>
+      </a>
+      <a
+        href="{% url 'transactions' %}"
+        class="{% if request.resolver_match.url_name == 'transactions' %}active{% endif %}"
+      >
+        <span>↕</span>
+        <small>Activity</small>
+      </a>
+      <a
+        href="{% url 'budgets' %}"
+        class="{% if request.resolver_match.url_name == 'budgets' %}active{% endif %}"
+      >
+        <span>▤</span>
+        <small>Budgets</small>
+      </a>
+      <a
+        href="{% url 'savings' %}"
+        class="{% if request.resolver_match.url_name == 'savings' %}active{% endif %}"
+      >
+        <span>◎</span>
+        <small>Goals</small>
+      </a>
+      <a
+        href="{% url 'profile' %}"
+        class="{% if request.resolver_match.url_name == 'profile' %}active{% endif %}"
+      >
+        <span class="mobile-settings-icon">{% include "finance/partials/settings_icon.html" %}</span>
+        <small>Profile</small>
+      </a>
+    </nav>
+  </div>
+{% else %}
+  {% block public_content %}
+  <main class="auth-shell">
+    <a class="brand auth-brand" href="{% url 'home' %}">
+      <img class="brand-logo brand-logo-light" src="{% static 'images/smartfinx-logo.png' %}?v=2" alt="SmartFinX">
+      <img class="brand-logo brand-logo-dark" src="{% static 'images/smartfinx-logo-dark.png' %}?v=1" alt="" aria-hidden="true">
+    </a>
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block auth_content %}{% endblock %}
+  </main>
+  {% endblock %}
+{% endif %}
+
+<script src="{% static 'js/main.js' %}?v=4" defer></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
